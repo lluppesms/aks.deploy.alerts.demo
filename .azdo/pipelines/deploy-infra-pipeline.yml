@@ -11,6 +11,10 @@ trigger: none
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
+  - name: deployMultiStage
+    displayName: Multi-Stage Deploy
+    type: boolean
+    default: false
   - name: deployInfra
     displayName: Deploy Infra
     type: boolean
@@ -30,13 +34,26 @@ variables:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- template: pipes/infra-only-pipe.yml
-  parameters:
-    environments: ['DEMO']
-    bicepFolderName: 'infra/bicep'
-    infraBicepFileName: 'main-infra.bicep'
-    alertsBicepFileName: 'main-alerts.bicep'
-    dashboardBicepFileName: 'main-dashboard.bicep'
-    deployInfra: ${{ parameters.deployInfra }}
-    deployAlerts: ${{ parameters.deployAlerts }}
-    deployDashboard: ${{ parameters.deployDashboard }}
+- ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
+  - template: pipes/infra-only-pipe.yml
+    parameters:
+      environments: ['DEMO']
+      bicepFolderName: 'infra/bicep'
+      infraBicepFileName: 'main-infra.bicep'
+      alertsBicepFileName: 'main-alerts.bicep'
+      dashboardBicepFileName: 'main-dashboard.bicep'
+      deployInfra: ${{ parameters.deployInfra }}
+      deployAlerts: ${{ parameters.deployAlerts }}
+      deployDashboard: ${{ parameters.deployDashboard }}
+
+- ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
+  - template: pipes/infra-only-pipe.yml
+    parameters:
+      environments: ['DEMO','QA']
+      bicepFolderName: 'infra/bicep'
+      infraBicepFileName: 'main-infra.bicep'
+      alertsBicepFileName: 'main-alerts.bicep'
+      dashboardBicepFileName: 'main-dashboard.bicep'
+      deployInfra: ${{ parameters.deployInfra }}
+      deployAlerts: ${{ parameters.deployAlerts }}
+      deployDashboard: ${{ parameters.deployDashboard }}

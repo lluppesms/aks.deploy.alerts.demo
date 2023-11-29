@@ -1,12 +1,20 @@
 # Azure DevOps Deployment Template Notes
 
-## Main Pipeline
+## 1. Azure DevOps Template Definitions
 
-- **deploy-infra-pipeline.yml** - Deploys the base infrastructure, alerts, and/or dashboard (via prompts)
-<!-- - **deploy-container-registry-pipeline.yml** - Deploys the container registry -->
-<!-- - **deploy-kube-pipeline.yml** - Deploys the AKS cluster -->
+These are the main pipelines defined for this project:
 
-## 1. Setup and Deploy Steps
+- **deploy-infra-pipeline.yml:** Builds and deploys all of the resources for this app and/or deploys the alerts and dashboard
+<!-- - **deploy-alert-pipeline.yml:** Deploys alerts for the AKS cluster -- Note: right now, this is expecting the cluster name to be set in the variable group -->
+<!-- - **deploy-container-registry-pipeline.yml:** Deploys the main-infra.bicep template and creates all of the Azure resources
+ -->
+<!-- - **deploy-kube-pipeline.yml:** Deploys the main-infra.bicep template and creates all of the Azure resources -->
+
+These YML files were designed to run as multi-stage environment deploys (i.e. DEV/QA/PROD). Each Azure DevOps environments can have permissions and approvals defined. For example, DEV can be published upon change, and QA/PROD environments can require an approval before any changes are made. If you don't supply environments, it will assume that it is a single environment named 'DEMO'.
+
+---
+
+## 2. Setup and Deploy Steps
 
 To deploy this application, execute the following steps:
 
@@ -28,19 +36,6 @@ To deploy this application, execute the following steps:
 
 ---
 
-## 2. Azure DevOps Template Definitions
-
-These are the main pipelines defined for this project:
-
-- **deploy-infra-pipeline.yml:** Builds and deploys all of the resources for this app and/or deploys the alerts
-- **deploy-alert-pipeline.yml:** Deploys alerts for the AKS cluster -- Note: right now, this is expecting the cluster name to be set in the variable group
-<!-- - **deploy-container-registry-pipeline.yml:** Deploys the main-infra.bicep template and creates all of the Azure resources
- -->
-<!-- - **deploy-kube-pipeline.yml:** Deploys the main-infra.bicep template and creates all of the Azure resources -->
-
-These YML files were designed to run as multi-stage environment deploys (i.e. DEV/QA/PROD). Each Azure DevOps environments can have permissions and approvals defined. For example, DEV can be published upon change, and QA/PROD environments can require an approval before any changes are made. If you don't supply environments, it will assume that it is a single environment named 'DEMO'.
-
----
 
 ## 3. Creating the Variable Group "AKSDemo"
 
