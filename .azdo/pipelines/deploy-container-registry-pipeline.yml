@@ -1,0 +1,21 @@
+# ----------------------------------------------------------------------------------------------------
+# Pipeline to deploy Azure Container Registry before app build/deploy
+# ----------------------------------------------------------------------------------------------------
+# This needs the variable group "AKSDemo" - see readme.md for details.
+# ----------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: 'ubuntu-latest'
+# ----------------------------------------------------------------------------------------------------
+trigger: none
+
+# ----------------------------------------------------------------------------------------------------
+variables:
+  - group: AKSDemo
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- template: pipes/infra-only-pipe.yml
+  parameters:
+    bicepFolderName: 'infra/bicep'
+    bicepFileName: 'main-containerregistry.bicep'

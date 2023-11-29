@@ -1,0 +1,42 @@
+# ----------------------------------------------------------------------------------------------------
+# Pipeline to deploy core Azure Container App resources
+# ----------------------------------------------------------------------------------------------------
+# This needs the variable group "AKSDemo" - see readme.md for details.
+# ----------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: 'ubuntu-latest'
+# ----------------------------------------------------------------------------------------------------
+trigger: none
+
+# ----------------------------------------------------------------------------------------------------
+parameters:
+  - name: deployInfra
+    displayName: Deploy Infra
+    type: boolean
+    default: false
+  - name: deployAlerts
+    displayName: Deploy Alerts
+    type: boolean
+    default: true
+  - name: deployDashboard
+    displayName: Deploy Dashboard
+    type: boolean
+    default: true
+
+# ----------------------------------------------------------------------------------------------------
+variables:
+  - group: AKSDemo
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- template: pipes/infra-only-pipe.yml
+  parameters:
+    environments: ['DEMO']
+    bicepFolderName: 'infra/bicep'
+    bicepFileName: 'main-infra.bicep'
+    alertsBicepFileName: 'main-alerts.bicep'
+    dashboardBicepFileName: 'main-dashboard.bicep'
+    deployInfra: ${{ parameters.deployInfra }}
+    deployAlerts: ${{ parameters.deployAlerts }}
+    deployDashboard: ${{ parameters.deployDashboard }}

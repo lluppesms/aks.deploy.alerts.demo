@@ -1,0 +1,73 @@
+# ----------------------------------------------------------------------------------------------------
+#   TODO:  this is a rough cut under development - it's never been run or tested...!
+# ----------------------------------------------------------------------------------------------------
+# Template to deploy Azure Resources for one environment
+# See: https://learn.microsoft.com/en-us/azure/aks/devops-pipeline?tabs=cli&pivots=pipelines-yaml
+#   Command Line: https://learn.microsoft.com/en-us/azure/aks/tutorial-kubernetes-deploy-application?tabs=azure-cli
+# ----------------------------------------------------------------------------------------------------
+parameters:
+- name: environmentName
+  default: 'DEMO'
+- name: bicepFolderName
+  default: 'infra/bicep'
+- name: bicepFileName
+  default: 'main.bicep'
+
+# - stage: Deploy
+#   displayName: Deploy stage
+#   dependsOn: Build
+# ----------------------------------------------------------------------------------------------------
+jobs:
+- deployment: Deploy
+  displayName: Deploy job
+  environment: ${{ parameters.environmentName }} # environment: 'myenv.aksnamespace' #customize with your environment
+  # strategy:
+  #   runOnce:
+  #     deploy:
+- job: CreateInfraJob
+  displayName: Create Infrastructure
+  variables:
+    - name: templateFile
+      value: '$(Pipeline.Workspace)/s/${{ parameters.bicepFolderName }}/${{ parameters.bicepFileName }}'
+    - name: environmentNameLower
+      value: ${{ lower(parameters.environmentName) }}
+
+# ---> where do these come from....?
+      #secretName: $(imagePullSecret)
+    - name: imagePullSecret
+      value: ''
+
+      #namespace: $(k8sNamespace)
+    - name: k8sNamespace
+      value: ''
+
+      #dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+    - name: dockerRegistryServiceConnection
+      value: ''
+
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifactName: 'manifests'
+      downloadPath: '$(System.ArtifactsDirectory)/manifests'
+
+  - task: KubernetesManifest@0
+    displayName: Create imagePullSecret
+    inputs:
+      action: createSecret
+      secretName: $(imagePullSecret)
+      namespace: $(k8sNamespace)
+      dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+  - task: KubernetesManifest@0
+    displayName: Deploy to Kubernetes cluster
+    inputs:
+      action: deploy
+      namespace: $(k8sNamespace)
+      manifests: |
+        $(System.ArtifactsDirectory)/manifests/deployment.yml
+        $(System.ArtifactsDirectory)/manifests/service.yml
+      imagePullSecrets: |
+        $(imagePullSecret)
+      containers: |
+        $(containerRegistry)/$(imageRepository):$(tag)

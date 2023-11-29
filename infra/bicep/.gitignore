@@ -1,0 +1,8 @@
+*.json
+!resourceabbreviations.json
+!armroles.json
+
+*.ps1
+!sshKeyCreate.ps1
+
+test.bicep

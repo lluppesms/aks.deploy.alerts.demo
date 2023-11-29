@@ -1,0 +1,152 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to deploy Azure Resources for one environment
+# ----------------------------------------------------------------------------------------------------
+parameters:
+- name: environmentName
+  default: 'DEMO'
+- name: bicepFolderName
+  default: 'infra/bicep'
+- name: bicepFileName
+  default: 'main.bicep'
+- name: parameterSet
+  default: 'main'
+
+# ----------------------------------------------------------------------------------------------------
+jobs:
+- deployment: CreateInfra
+  displayName: Initialize Create Infra
+  environment: ${{ parameters.environmentName }}
+
+- job: CreateInfraJob
+  displayName: Create Infrastructure
+  variables:
+    - name: environmentNameLower
+      value: ${{ lower(parameters.environmentName) }}
+    - name: bicepFileName
+      value: ${{ parameters.bicepFileName }}
+    - name: templateFileName
+      value: '$(Build.SourcesDirectory)/${{ parameters.bicepFolderName }}/${{ parameters.bicepFileName }}'
+    - name: bicepParametersFileName
+      value: '$(Build.SourcesDirectory)/${{ parameters.bicepFolderName }}/main.parameters.bicepparam'
+    - name: jsonParametersFileName
+      value: '$(Build.SourcesDirectory)/${{ parameters.bicepFolderName }}/main.parameters.json'
+
+  steps:
+  - bash: |
+      resourceGroupName=$(echo "$(resourceGroupPrefix)_$(environmentNameLower)" | tr '[:upper:]' '[:lower:]')
+      echo "resourceGroupName=$resourceGroupName"
+      echo "##vso[task.setvariable variable=resourceGroupName]$resourceGroupName"
+    displayName: 'Create Variables'
+    continueOnError: true
+
+  - bash: |
+      echo "resourceGroupName=$(resourceGroupName)"
+      echo "appName=$(appName)"
+      echo "notificationEmail=$(notificationEmail)"
+      echo "actionGroupName=$(actionGroupName)"
+      echo "actionGroupShortName=$(actionGroupShortName)"
+      echo "environmentNameLower=$(environmentNameLower)"
+      echo "serviceConnectionName=$(serviceConnectionName)"
+      echo "subscriptionName=$(subscriptionName)"
+      echo "location=$(location)"
+      echo "templateFileName=$(templateFileName)"
+      echo "bicepParametersFileName=$(bicepParametersFileName)"
+      echo "jsonParametersFileName=$(jsonParametersFileName)"
+      echo "Pipeline.Workspace=$(Pipeline.Workspace)"
+      echo "Build.SourcesDirectory=$(Build.SourcesDirectory)"
+    displayName: 'Display Variables'
+    continueOnError: true
+
+  - ${{ if eq(lower(parameters.parameterSet), 'main') }}:
+    - bash: |
+        echo "Creating $(bicepParametersFileName) with ${{ parameters.parameterSet }} parms"
+        echo "using '$(bicepFileName)'" > $(bicepParametersFileName)
+        echo "param appName = '$(appName)'" >> $(bicepParametersFileName)
+        echo "param envName = '$(environmentNameLower)'" >> $(bicepParametersFileName)
+        echo "" >> $(bicepParametersFileName)
+        echo "----- Bicep Parameters File Contents:"
+        cat $(bicepParametersFileName)
+        echo ""
+      displayName: 'Create Main Parms'
+  - ${{ if eq(lower(parameters.parameterSet), 'alerts') }}:
+    - bash: |
+        echo "Creating $(bicepParametersFileName) with ${{ parameters.parameterSet }} parms"
+        echo "using '$(bicepFileName)'" > $(bicepParametersFileName)
+        echo "param appName = '$(appName)'" >> $(bicepParametersFileName)
+        echo "param envName = '$(environmentNameLower)'" >> $(bicepParametersFileName)
+        echo "param notificationEmail = '$(notificationEmail)'" >> $(bicepParametersFileName)
+        echo "param actionGroupName = '$(actionGroupName)'" >> $(bicepParametersFileName)
+        echo "param actionGroupShortName = '$(actionGroupShortName)'" >> $(bicepParametersFileName)
+        echo "" >> $(bicepParametersFileName)
+        echo "----- Bicep Parameters File Contents:"
+        cat $(bicepParametersFileName)
+        echo ""
+      displayName: 'Create Alerts Parms'
+  - ${{ if eq(lower(parameters.parameterSet), 'dashboard') }}:
+    - bash: |
+        echo "Creating $(bicepParametersFileName) with ${{ parameters.parameterSet }} parms"
+        echo "using '$(bicepFileName)'" > $(bicepParametersFileName)
+        echo "param appName = '$(appName)'" >> $(bicepParametersFileName)
+        echo "param envName = '$(environmentNameLower)'" >> $(bicepParametersFileName)
+        echo "" >> $(bicepParametersFileName)
+        echo "----- Bicep Parameters File Contents:"
+        cat $(bicepParametersFileName)
+        echo ""
+      displayName: 'Create Dashboard Parms'
+  
+  # We need to convert the .bicepparam file to a JSON file (just until this issue is fixed!)
+  # Issue: if you use the .bicepparam file with AzureResourceManagerTemplateDeployment@3, it throws an error:
+  #   Ensure the Parameters file is valid. Unexpected token u in JSON at position 0
+  # https://github.com/Azure/bicep/issues/11028
+  # https://github.com/microsoft/azure-pipelines-tasks/issues/18521
+  - script: bicep build-params $(bicepParametersFileName)
+    displayName: Convert BicepParam File to JSON
+
+  - bash: |
+      echo "----- JSON Parameters File Contents:"
+      cat $(jsonParametersFileName)
+      echo ""
+      echo ""
+      echo "Contents of $(System.DefaultWorkingDirectory) (System.DefaultWorkingDirectory)"
+      tree $(Pipeline.Workspace)
+    displayName: 'Display Files'
+    continueOnError: true
+
+  - task: AzureCLI@2
+    displayName: 'Create Resource Group'
+    inputs:
+      azureSubscription: $(subscriptionName)
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: az group create --name $(resourceGroupName) --location $(location)
+
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: 'Publish Bicep Resources'
+    inputs:
+      # Azure Details
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: $(serviceConnectionName)
+      location: $(location)
+      resourceGroupName: $(resourceGroupName)
+      # Template
+      templateLocation: 'Linked artifact'
+      csmFile: $(templateFileName)
+      csmParametersFile: $(jsonParametersFileName)
+      deploymentMode: 'Incremental'
+      # Advanced
+      action: 'Create Or Update Resource Group'
+      deploymentOutputs: armDeployment
+
+  - bash: |
+      echo "Wiping $(bicepParametersFileName)"
+      echo "NULL" > $(bicepParametersFileName)
+      echo "Wiping $(jsonParametersFileName)"
+      echo "NULL" > $(jsonParametersFileName)
+      echo ""
+      echo "----- Bicep Parameters File Contents:"
+      cat $(bicepParametersFileName)
+      echo ""
+      echo "----- JSON Parameters File Contents:"
+      cat $(jsonParametersFileName)
+    displayName: 'Erase Parms Files'
+    condition: always() # this step will always run, even if the pipeline is canceled

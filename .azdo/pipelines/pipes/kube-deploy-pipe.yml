@@ -1,0 +1,28 @@
+# ----------------------------------------------------------------------------------------------------
+#   TODO:  this is a rough cut under development - it's never been run or tested...!
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipe to deploy Azure Resources Only for multiple environments
+# ------------------------------------------------------------------------------------------------------------------------
+parameters:
+- name: environments
+  type: object
+  default: ['DEMO']
+- name: dockerFileName
+  default: 'src/aks.yaml'
+# - name: bicepFolderName
+#   default: 'infra/bicep'
+# - name: bicepFileName
+#   default: 'main.bicep'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- ${{ each environmentName in parameters.environments }} :
+  - stage: CreateInfra${{ environmentName }}
+    displayName: Create ${{ environmentName }} Resources
+    jobs:
+    - template: templates/kube-deploy-template.yml
+      parameters:
+        environmentName: ${{ environmentName }}
+        dockerFileName: ${{ parameters.dockerFileName }}
+        # bicepFolderName: ${{ parameters.bicepFolderName }}
+        # bicepFileName: ${{ parameters.bicepFileName }}

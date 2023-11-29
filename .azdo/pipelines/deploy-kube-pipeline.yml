@@ -1,0 +1,25 @@
+# ----------------------------------------------------------------------------------------------------
+#   TODO:  this is a rough cut under development - it's never been run or tested...!
+# ----------------------------------------------------------------------------------------------------
+# Pipeline to deploy Kubernetes cluster resource
+# ----------------------------------------------------------------------------------------------------
+# This needs the variable group "AKSDemo" - see readme.md for details.
+# ----------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: 'ubuntu-latest'
+# ----------------------------------------------------------------------------------------------------
+trigger: none
+
+# ----------------------------------------------------------------------------------------------------
+variables:
+  - group: AKSDemo
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- template: pipes/kube-deploy-pipe.yml
+  parameters:
+    environments: ['DEMO']
+    # bicepFolderName: 'infra/bicep'
+    # bicepFileName: 'main-infra.bicep'
+    dockerFileName: 'src/quickstart/aks-store-quickstart.yaml'

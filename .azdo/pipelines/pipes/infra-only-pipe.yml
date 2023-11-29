@@ -1,0 +1,79 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipe to deploy Azure Resources Only for multiple environments
+# ------------------------------------------------------------------------------------------------------------------------
+parameters:
+- name: environments
+  type: object
+  default: ['DEMO']
+- name: bicepFolderName
+  default: 'infra/bicep'
+- name: bicepFileName
+  default: 'main.bicep'
+- name: alertsBicepFileName
+  default: 'main-alerts.bicep'
+- name: dashboardBicepFileName
+  default: 'main-dashboard.bicep'
+- name: deployInfra
+  default: 'false'
+- name: deployAlerts
+  default: 'false'
+- name: deployDashboard
+  default: 'false'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- ${{ each environmentName in parameters.environments }} :
+  - ${{ if eq(lower(parameters.deployInfra), 'true') }}:
+    - stage: CreateInfra${{ environmentName }}
+      displayName: Create ${{ environmentName }} Resources
+      jobs:
+      - template: templates/create-infra-template.yml
+        parameters:
+          environmentName: ${{ environmentName }}
+          bicepFolderName: ${{ parameters.bicepFolderName }}
+          bicepFileName: ${{ parameters.bicepFileName }}
+          parameterSet: 'main'
+    - ${{ if eq(lower(parameters.deployAlerts), 'true') }}:
+      - stage: CreateAlerts${{ environmentName }}
+        dependsOn: CreateInfra${{ environmentName }}
+        displayName: Create ${{ environmentName }} Alerts
+        jobs:
+        - template: templates/create-infra-template.yml
+          parameters:
+            environmentName: ${{ environmentName }}
+            bicepFolderName: ${{ parameters.bicepFolderName }}
+            bicepFileName: ${{ parameters.alertsBicepFileName }}
+            parameterSet: 'alerts'
+    - ${{ if eq(lower(parameters.deployDashboard), 'true') }}:
+      - stage: CreateDashboard${{ environmentName }}
+        dependsOn: CreateInfra${{ environmentName }}
+        displayName: Create ${{ environmentName }} Dashboard
+        jobs:
+        - template: templates/create-infra-template.yml
+          parameters:
+            environmentName: ${{ environmentName }}
+            bicepFolderName: ${{ parameters.bicepFolderName }}
+            bicepFileName: ${{ parameters.dashboardBicepFileName }}
+            parameterSet: 'dashboard'
+
+  - ${{ if eq(lower(parameters.deployInfra), 'false') }}:
+    - ${{ if eq(lower(parameters.deployAlerts), 'true') }}:
+      - stage: CreateAlerts${{ environmentName }}
+        displayName: Create ${{ environmentName }} Alerts
+        jobs:
+        - template: templates/create-infra-template.yml
+          parameters:
+            environmentName: ${{ environmentName }}
+            bicepFolderName: ${{ parameters.bicepFolderName }}
+            bicepFileName: ${{ parameters.alertsBicepFileName }}
+            parameterSet: 'alerts'
+    - ${{ if eq(lower(parameters.deployDashboard), 'true') }}:
+      - stage: CreateDashboard${{ environmentName }}
+        displayName: Create ${{ environmentName }} Dashboard
+        jobs:
+        - template: templates/create-infra-template.yml
+          parameters:
+            environmentName: ${{ environmentName }}
+            bicepFolderName: ${{ parameters.bicepFolderName }}
+            bicepFileName: ${{ parameters.dashboardBicepFileName }}
+            parameterSet: 'dashboard'
