@@ -18,6 +18,10 @@ The bicep and pipeline in this project will generate:
 
 ![Example](./docs/SampleResources.png)
 
+### Example Dashboard
+
+![Example](./docs/Dashboard.png)
+
 ### Contents of Query Pack
 
 Name:
