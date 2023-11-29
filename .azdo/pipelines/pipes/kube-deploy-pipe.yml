@@ -9,10 +9,6 @@ parameters:
   default: ['DEMO']
 - name: dockerFileName
   default: 'src/aks.yaml'
-# - name: bicepFolderName
-#   default: 'infra/bicep'
-# - name: bicepFileName
-#   default: 'main.bicep'
 
 # ----------------------------------------------------------------------------------------------------
 stages:
@@ -24,5 +20,3 @@ stages:
       parameters:
         environmentName: ${{ environmentName }}
         dockerFileName: ${{ parameters.dockerFileName }}
-        # bicepFolderName: ${{ parameters.bicepFolderName }}
-        # bicepFileName: ${{ parameters.bicepFileName }}

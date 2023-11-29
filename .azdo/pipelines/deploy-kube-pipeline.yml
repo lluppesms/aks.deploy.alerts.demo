@@ -20,6 +20,4 @@ stages:
 - template: pipes/kube-deploy-pipe.yml
   parameters:
     environments: ['DEMO']
-    # bicepFolderName: 'infra/bicep'
-    # bicepFileName: 'main-infra.bicep'
     dockerFileName: 'src/quickstart/aks-store-quickstart.yaml'

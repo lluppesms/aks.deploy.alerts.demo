@@ -19,8 +19,7 @@ stages:
   parameters:
     environments: ['DEMO']
     bicepFolderName: 'infra/bicep'
-    bicepFileName: 'main-infra.bicep'
     alertsBicepFileName: 'main-alerts.bicep'
     deployInfra: 'false'
     deployAlerts: 'true'
-    deployDashboard: 'true'
+    deployDashboard: 'false'

@@ -1,5 +1,11 @@
 # Azure DevOps Deployment Template Notes
 
+## Main Pipeline
+
+- **deploy-infra-pipeline.yml** - Deploys the base infrastructure, alerts, and/or dashboard (via prompts)
+<!-- - **deploy-container-registry-pipeline.yml** - Deploys the container registry -->
+<!-- - **deploy-kube-pipeline.yml** - Deploys the AKS cluster -->
+
 ## 1. Setup and Deploy Steps
 
 To deploy this application, execute the following steps:

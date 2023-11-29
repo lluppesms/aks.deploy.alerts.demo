@@ -7,7 +7,7 @@ parameters:
   default: ['DEMO']
 - name: bicepFolderName
   default: 'infra/bicep'
-- name: bicepFileName
+- name: infraBicepFileName
   default: 'main.bicep'
 - name: alertsBicepFileName
   default: 'main-alerts.bicep'
@@ -31,7 +31,7 @@ stages:
         parameters:
           environmentName: ${{ environmentName }}
           bicepFolderName: ${{ parameters.bicepFolderName }}
-          bicepFileName: ${{ parameters.bicepFileName }}
+          bicepFileName: ${{ parameters.infraBicepFileName }}
           parameterSet: 'main'
     - ${{ if eq(lower(parameters.deployAlerts), 'true') }}:
       - stage: CreateAlerts${{ environmentName }}

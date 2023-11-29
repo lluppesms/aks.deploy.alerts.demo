@@ -8,10 +8,8 @@
 parameters:
 - name: environmentName
   default: 'DEMO'
-- name: bicepFolderName
-  default: 'infra/bicep'
-- name: bicepFileName
-  default: 'main.bicep'
+- name: dockerFileName
+  default: 'src/aks.yaml'
 
 # - stage: Deploy
 #   displayName: Deploy stage
@@ -27,8 +25,6 @@ jobs:
 - job: CreateInfraJob
   displayName: Create Infrastructure
   variables:
-    - name: templateFile
-      value: '$(Pipeline.Workspace)/s/${{ parameters.bicepFolderName }}/${{ parameters.bicepFileName }}'
     - name: environmentNameLower
       value: ${{ lower(parameters.environmentName) }}
 

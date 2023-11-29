@@ -18,4 +18,7 @@ stages:
 - template: pipes/infra-only-pipe.yml
   parameters:
     bicepFolderName: 'infra/bicep'
-    bicepFileName: 'main-containerregistry.bicep'
+    infraBicepFileName: 'main-containerregistry.bicep'
+    deployInfra: 'true'
+    deployAlerts: 'false'
+    deployDashboard: 'false'
