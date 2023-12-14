@@ -28,7 +28,7 @@ module resourceNames 'resourcenames.bicep' = {
 // Create Action Group
 // ------------------------------------------------------------------------------------------------------------------------
 module dashboardModule 'dashboard.bicep' = {
-  name: 'actionGroups${deploymentSuffix}'
+  name: 'dashboard${deploymentSuffix}'
   params: {
      dashboardName: resourceNames.outputs.dashboardName
      dashboardDisplayName: resourceNames.outputs.dashboardDisplayName
