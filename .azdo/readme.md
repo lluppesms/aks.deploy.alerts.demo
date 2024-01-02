@@ -28,6 +28,7 @@ To deploy this application, execute the following steps:
 
 - [Create Azure DevOps Pipelines](https://docs.luppes.com/CreateNewPipeline/)
 
+<!-- 
 You may also need to:
 
 - Run the deploy-(kube/container-registry/infra)-pipeline.yml pipelines to deploy needed Azure Resources.
@@ -35,6 +36,7 @@ You may also need to:
 - Create a Docker Service Connection in the Project Settings
 
 - Add the Docker Service Connection and ACR User/Password to the Variable Group
+-->
 
 ---
 
@@ -63,6 +65,7 @@ Create a variable group with these values before running the aca-infra-pipeline.
          subscriptionName=<yourSubscriptionName>
 ```
 
+<!--
 ### 3.2. Create Docker Service Connection (Optional)
 
 AFTER creating the Azure Container Registry, go into the Project Settings and create a Docker Service Connection that will allow pipelines to connect to the Container Registry.
@@ -83,3 +86,4 @@ Make these entries in the Variable Group:
   acrAdminUserName=<fromContainerRegistryPage>
   acrAdminPassword=<fromContainerRegistryPage>
 ```
+-->
