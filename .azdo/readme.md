@@ -4,11 +4,10 @@
 
 These are the main pipelines defined for this project:
 
-- **deploy-infra-pipeline.yml:** Builds and deploys all of the resources for this app and/or deploys the alerts and dashboard
-<!-- - **deploy-alert-pipeline.yml:** Deploys alerts for the AKS cluster -- Note: right now, this is expecting the cluster name to be set in the variable group -->
-<!-- - **deploy-container-registry-pipeline.yml:** Deploys the main-infra.bicep template and creates all of the Azure resources
- -->
-<!-- - **deploy-kube-pipeline.yml:** Deploys the main-infra.bicep template and creates all of the Azure resources -->
+- **deploy-kube-pipeline.yml:** Deploys the AKS quickstart YAML file to create an AKS cluster for this test -- not needed if you already have an AKS cluster
+- **deploy-container-registry-pipeline.yml:** Deploys the main-containerregistry.bicep template to create an Azure Container Registry (ACR) for the AKS deploys - not needed if you already have an ACR
+- **deploy-infra-pipeline.yml:** Builds and deploys all of the resources for this app defined in the main-infra.bicep file. Can also optionally deploys the alerts and dashboard
+- **deploy-alert-pipeline.yml:** Deploys alerts for the AKS cluster -- Note: right now, this is expecting the cluster name to be set in the variable group
 
 These YML files were designed to run as multi-stage environment deploys (i.e. DEV/QA/PROD). Each Azure DevOps environments can have permissions and approvals defined. For example, DEV can be published upon change, and QA/PROD environments can require an approval before any changes are made. If you don't supply environments, it will assume that it is a single environment named 'DEMO'.
 
