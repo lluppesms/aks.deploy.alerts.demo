@@ -7,7 +7,10 @@ These are the main pipelines defined for this project:
 - **deploy-kube-pipeline.yml:** Deploys the AKS quickstart YAML file to create an AKS cluster for this test -- not needed if you already have an AKS cluster
 - **deploy-container-registry-pipeline.yml:** Deploys the main-containerregistry.bicep template to create an Azure Container Registry (ACR) for the AKS deploys - not needed if you already have an ACR
 - **deploy-infra-pipeline.yml:** Builds and deploys all of the resources for this app defined in the main-infra.bicep file. Can also optionally deploys the alerts and dashboard
-- **deploy-alert-pipeline.yml:** Deploys alerts for the AKS cluster -- Note: right now, this is expecting the cluster name to be set in the variable group
+- **deploy-alerts-pipeline.yml:** Deploys alerts for the AKS clusterthe variable group
+- **deploy-dashboard-pipeline.yml:** Deploys a sample dashboard for the AKS cluster
+
+Note: The alerts and dashboard pipelines are expecting the cluster name to be set in the variable group before they can run.
 
 These YML files were designed to run as multi-stage environment deploys (i.e. DEV/QA/PROD). Each Azure DevOps environments can have permissions and approvals defined. For example, DEV can be published upon change, and QA/PROD environments can require an approval before any changes are made. If you don't supply environments, it will assume that it is a single environment named 'DEMO'.
 
@@ -25,16 +28,15 @@ To deploy this application, execute the following steps:
 
 - [Create Azure DevOps Pipelines](https://docs.luppes.com/CreateNewPipeline/)
 
-<!-- - Run the aca-infra-pipeline.yml pipeline to deploy the base Azure Resources to an Azure subscription.
+You may also need to:
+
+- Run the deploy-(kube/container-registry/infra)-pipeline.yml pipelines to deploy needed Azure Resources.
 
 - Create a Docker Service Connection in the Project Settings
 
 - Add the Docker Service Connection and ACR User/Password to the Variable Group
 
-- Run the aca-deploy-apps-pipeline.yml pipeline to build and deploy the applications to the ACA. -->
-
 ---
-
 
 ## 3. Creating the Variable Group "AKSDemo"
 
@@ -61,13 +63,13 @@ Create a variable group with these values before running the aca-infra-pipeline.
          subscriptionName=<yourSubscriptionName>
 ```
 
-<!-- ### 3.2. Create Docker Service Connection
+### 3.2. Create Docker Service Connection (Optional)
 
 AFTER creating the Azure Container Registry, go into the Project Settings and create a Docker Service Connection that will allow pipelines to connect to the Container Registry.
 
-![Create Docker Service Connection](DockerServiceConnection.png)
- 
-### 3.3. Update the Variable Group
+![Create Docker Service Connection](../docs/DockerServiceConnection.png)
+
+### 3.3. Update the Variable Group (Optional)
 
 After creating the Docker Service Connection, add these four variables in the variable group.  
 
@@ -81,4 +83,3 @@ Make these entries in the Variable Group:
   acrAdminUserName=<fromContainerRegistryPage>
   acrAdminPassword=<fromContainerRegistryPage>
 ```
--->
